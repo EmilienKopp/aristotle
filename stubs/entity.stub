@@ -1,0 +1,14 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+{{ imports }}
+
+final class {{ class }} extends BaseEntity
+{
+    public function __construct(
+{{ properties }}
+    ) {}
+}
