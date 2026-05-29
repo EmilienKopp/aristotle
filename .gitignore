@@ -1,0 +1,17 @@
+/vendor/
+/node_modules/
+/.phpunit.cache/
+/.pest/
+/coverage/
+
+composer.lock
+.env
+.env.*
+!.env.example
+
+.phpunit.result.cache
+phpunit.xml
+.phpactor.json
+
+.DS_Store
+Thumbs.db
