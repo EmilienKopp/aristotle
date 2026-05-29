@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Splitstack\Aristotle;
 
 use Illuminate\Support\ServiceProvider;
+use Splitstack\Aristotle\Console\Commands\MakeDtoCommand;
 use Splitstack\Aristotle\Console\Commands\MakeEntityCommand;
 use Splitstack\Aristotle\Support\CastTypeResolver;
 
@@ -26,9 +27,13 @@ final class AristotleServiceProvider extends ServiceProvider
 
             $this->publishes([
                 __DIR__.'/../stubs/entity.stub' => base_path('stubs/entity.stub'),
+                __DIR__.'/../stubs/dto.stub' => base_path('stubs/dto.stub'),
             ], 'aristotle-stubs');
 
-            $this->commands([MakeEntityCommand::class]);
+            $this->commands([
+                MakeEntityCommand::class,
+                MakeDtoCommand::class,
+            ]);
         }
     }
 }

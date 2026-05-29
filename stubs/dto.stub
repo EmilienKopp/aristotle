@@ -1,0 +1,24 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+{{ imports }}
+
+final class {{ class }} extends BaseDTO
+{
+    public function __construct(
+{{ properties }}
+    ) {}
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    public static function fromArray(array $data): static
+    {
+        return new self(
+{{ assignments }}
+        );
+    }
+}

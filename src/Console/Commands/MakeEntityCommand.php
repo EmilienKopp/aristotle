@@ -10,6 +10,7 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
+use Splitstack\Aristotle\Concerns\HasDomainPrompts;
 use Splitstack\Aristotle\Support\CastTypeResolver;
 
 use function Laravel\Prompts\suggest;
@@ -17,7 +18,9 @@ use function Laravel\Prompts\text;
 
 final class MakeEntityCommand extends Command
 {
-    protected $signature = 'make:entity
+    use HasDomainPrompts;
+
+    protected $signature = 'aristotle:entity
         {name? : The entity class name}
         {--model= : The Eloquent model to scaffold from}
         {--domain= : The bounded context / domain folder}
@@ -83,7 +86,7 @@ final class MakeEntityCommand extends Command
         $finalClassName = $className.($suffix ? ucfirst((string) $suffix) : '');
 
         $stub = $files->get($this->stubPath($files));
-        $contents = $this->fillStub($stub, $namespace, $finalClassName, $modelClass, $imports, $properties);
+        $contents = $this->fillStub($stub, $namespace, $finalClassName, $imports, $properties);
 
         $files->ensureDirectoryExists(dirname($targetPath));
         $files->put($targetPath, $contents);
@@ -122,7 +125,7 @@ final class MakeEntityCommand extends Command
      * @param  list<string>  $imports
      * @param  list<string>  $properties
      */
-    private function fillStub(string $stub, string $namespace, string $class, string $modelClass, array $imports, array $properties): string
+    private function fillStub(string $stub, string $namespace, string $class, array $imports, array $properties): string
     {
         $formattedImports = collect($imports)
             ->unique()
@@ -167,59 +170,6 @@ final class MakeEntityCommand extends Command
         }
 
         throw new RuntimeException("Model [{$model}] could not be resolved.");
-    }
-
-    private function resolveDomain(string $baseNamespace): string
-    {
-        $default = '';
-        $existing = $this->discoverDomains($baseNamespace);
-
-        $domain = (string) ($this->option('domain') ?: (
-            $existing !== []
-                ? suggest(
-                    label: 'Which domain does this entity belong to?',
-                    options: $existing,
-                    default: $default,
-                )
-                : text(
-                    label: 'Which domain does this entity belong to?',
-                )
-        ));
-
-        return Str::studly($domain);
-    }
-
-    /** @return list<string> */
-    private function discoverModels(): array
-    {
-        $modelsPath = app_path('Models');
-
-        if (! is_dir($modelsPath)) {
-            return [];
-        }
-
-        return collect(glob($modelsPath.'/*.php') ?: [])
-            ->map(fn (string $file): string => pathinfo($file, PATHINFO_FILENAME))
-            ->sort()
-            ->values()
-            ->all();
-    }
-
-    /** @return list<string> */
-    private function discoverDomains(string $baseNamespace): array
-    {
-        $appNamespace = rtrim((string) $this->laravel->getNamespace(), '\\');
-        $relative = str_replace('\\', '/', ltrim(Str::replaceFirst($appNamespace, '', $baseNamespace), '\\'));
-        $domainRoot = $relative !== '' ? app_path($relative) : app_path();
-
-        if (! is_dir($domainRoot)) {
-            return [];
-        }
-
-        return collect(scandir($domainRoot) ?: [])
-            ->filter(fn (string $item): bool => ! in_array($item, ['.', '..'], true) && is_dir($domainRoot.'/'.$item))
-            ->values()
-            ->all();
     }
 
     private function targetPath(string $namespace, string $class): string
