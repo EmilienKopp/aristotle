@@ -34,8 +34,12 @@
             ]
         }
     },
+    "scripts": {
+        "test": "vendor/bin/pest"
+    },
     "config": {
         "sort-packages": true
-    }
-    
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }
